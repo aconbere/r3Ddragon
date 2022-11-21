@@ -60,10 +60,11 @@ ARCH	:=	-march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft
 
 # FIXME: Remove -fcommon once all multiple definitions are fixed
 CFLAGS	:=	-g -Wall -O2 -mword-relocations \
+			-Wno-unused-variable \
 			-ffunction-sections -fcommon \
 			$(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -DARM11 -D_3DS $(EXTRA_CFLAGS)
+CFLAGS	+=	$(INCLUDE) -D__3DS__ $(EXTRA_CFLAGS)
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++11
 

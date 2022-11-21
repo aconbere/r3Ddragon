@@ -5,8 +5,9 @@
 #include "allegro_compat.h"
 #include "vb_dsp.h"
 #include "vb_set.h"
+#include "vb_gui.h"
 
-#ifdef _3DS
+#ifdef __3DS__
 #include <3ds.h>
 #endif
 
@@ -101,7 +102,7 @@ typedef struct {
     float vol;
     float pan;
     SAMPLE* spl;
-#ifdef _3DS
+#ifdef __3DS__
     ndspWaveBuf ndsp_buf;
 #endif
 } snd_channel;
@@ -110,7 +111,7 @@ snd_channel* channels;
 u32 available;
 
 int install_sound(int digi, int midi, const char *config_path) {
-#ifdef _3DS
+#ifdef __3DS__
 #if DEBUGLEVEL == 0
     if (ndspInit())
         return -1;
@@ -126,7 +127,7 @@ int install_sound(int digi, int midi, const char *config_path) {
 
 void remove_sound() {
     linearFree(channels);
-#ifdef _3DS
+#ifdef __3DS__
     ndspExit();
 #endif
 }
@@ -186,13 +187,13 @@ int allocate_voice(SAMPLE* spl) {
 }
 
 void voice_set_playmode(int voice, int playmode) {
-#ifdef _3DS
+#ifdef __3DS__
     channels[voice].ndsp_buf.looping = (playmode == PLAYMODE_LOOP);
 #endif
 }
 
 void voice_stop(int voice) {
-#ifdef _3DS
+#ifdef __3DS__
     ndspChnWaveBufClear(voice);
 #endif
     channels[voice].playing = false;
@@ -221,7 +222,7 @@ void voice_start(int voice) {
         return;
 
     channels[voice].playing = true;
-#ifdef _3DS
+#ifdef __3DS__
     memset(&channels[voice].ndsp_buf, 0, sizeof(ndspWaveBuf));
     channels[voice].ndsp_buf.data_vaddr = channels[voice].spl->data;
     channels[voice].ndsp_buf.nsamples = channels[voice].spl->len;
@@ -240,7 +241,7 @@ void voice_set_volume(int voice, int volume) {
     float mix[12];
     int i;
     channels[voice].vol = volume/255.0f;
-#ifdef _3DS
+#ifdef __3DS__
     for (i = 0; i < 12; i++)
         mix[i] = channels[voice].vol;
     ndspChnSetMix(voice, mix);
@@ -262,7 +263,7 @@ void voice_ramp_volume(int voice, int time, int endvol) {
 
 void voice_set_frequency(int voice, int frequency) {
     channels[voice].rate = frequency;
-#ifdef _3DS
+#ifdef __3DS__
     ndspChnSetRate(voice, frequency);
 #endif
 }
@@ -275,14 +276,14 @@ int voice_get_frequency(int voice) {
 
 void toggle3D() {
     tVBOpt.DSPMODE = !tVBOpt.DSPMODE;
-#ifdef _3DS
+#ifdef __3DS__
     gfxSet3D(tVBOpt.DSPMODE);
 #endif
 }
 
 // Returns the position of the selected item or -1 if the menu was cancelled
 int openMenu(menu_t* menu) {
-#ifdef _3DS
+#ifdef __3DS__
     int i, numitems, pos, startpos;
     menu_t* cur_menu = menu;
     u32 keys;
@@ -396,12 +397,12 @@ static inline void unicodeToChar(char* dst, uint16_t* src, int max) {
     *dst = 0x00;
 }
 
-#ifdef _3DS
+#ifdef __3DS__
 FS_Archive sdmcArchive;
 #endif
 // TODO: Only show files that match the extension
 int fileSelect(const char* message, char* path, const char* ext) {
-#ifdef _3DS
+#ifdef __3DS__
     int i, pos = 0, item;
     menu_item_t files[64];
     char filenames[64][128];
@@ -415,7 +416,7 @@ int fileSelect(const char* message, char* path, const char* ext) {
     Result res = FSUSER_OpenDirectory(&dirHandle, sdmcArchive, fsMakePath(PATH_ASCII, "/vb/"));
     if (res) {
         consoleClear();
-        printf("ERROR: %08X\n", res);
+        printf("ERROR: %08lX\n", res);
         printf("Unable to open sdmc:/vb/\n");
         printf("Press any key to exit...\n");
         waitForInput();
